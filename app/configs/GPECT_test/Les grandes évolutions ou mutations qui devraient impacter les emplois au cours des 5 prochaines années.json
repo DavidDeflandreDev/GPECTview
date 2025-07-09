@@ -1,0 +1,24 @@
+{
+    "selected_columns": [
+        "Grandes \u00e9volutions/mutations sur 5 ans\ud83d\udd2e\u200b"
+    ],
+    "start_row": 0,
+    "end_row": 12,
+    "analysis_mode": "Comparaison multiple",
+    "graph_type": "Barres",
+    "agg_func": "Somme",
+    "display_as_percent": false,
+    "graph_title": "Les grandes \u00e9volutions ou mutations qui devraient impacter les emplois au cours des 5 prochaines ann\u00e9es",
+    "value_cols_multiple": [
+        "Grandes \u00e9volutions/mutations sur 5 ans\ud83d\udd2e\u200b"
+    ],
+    "value_cols_stack": [],
+    "group_col_stack": null,
+    "col_x": null,
+    "col_y": null,
+    "x_axis_label": "",
+    "y_axis_label": "",
+    "invert_axes": true,
+    "palette_name": "Plotly",
+    "hide_zeros": false
+}

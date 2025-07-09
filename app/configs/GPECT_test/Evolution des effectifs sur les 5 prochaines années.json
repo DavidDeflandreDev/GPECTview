@@ -1,0 +1,24 @@
+{
+    "selected_columns": [
+        "Evolution masse salariale"
+    ],
+    "start_row": 0,
+    "end_row": 12,
+    "analysis_mode": "Comparaison multiple",
+    "graph_type": "Camembert",
+    "agg_func": "Somme",
+    "display_as_percent": true,
+    "graph_title": "Evolution des effectifs sur les 5 prochaines ann\u00e9es",
+    "value_cols_multiple": [
+        "Evolution masse salariale"
+    ],
+    "value_cols_stack": [],
+    "group_col_stack": null,
+    "col_x": null,
+    "col_y": null,
+    "x_axis_label": "Label",
+    "y_axis_label": "Valeur",
+    "invert_axes": false,
+    "palette_name": "Cividis",
+    "hide_zeros": false
+}

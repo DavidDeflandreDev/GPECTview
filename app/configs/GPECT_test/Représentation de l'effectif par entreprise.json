@@ -1,0 +1,36 @@
+{
+    "selected_columns": [
+        "Nombre de CDI",
+        "Nombre de CDD",
+        "Nombre d'int\u00e9rimaires",
+        "Raison sociale",
+        "Nombre d'apprentissage ou alternance"
+    ],
+    "start_row": 0,
+    "end_row": 12,
+    "analysis_mode": "Comparaison multiple",
+    "graph_type": "Barres empil\u00e9es",
+    "agg_func": "Somme",
+    "display_as_percent": true,
+    "graph_title": "Repr\u00e9sentation de l'effectif par entreprise",
+    "value_cols_multiple": [
+        "Nombre de CDI",
+        "Nombre de CDD",
+        "Nombre d'int\u00e9rimaires",
+        "Nombre d'apprentissage ou alternance"
+    ],
+    "value_cols_stack": [
+        "Nombre de CDI",
+        "Nombre de CDD",
+        "Nombre d'int\u00e9rimaires",
+        "Nombre d'apprentissage ou alternance"
+    ],
+    "group_col_stack": "Raison sociale",
+    "col_x": null,
+    "col_y": null,
+    "x_axis_label": "Effectif en %",
+    "y_axis_label": "Entreprises",
+    "invert_axes": true,
+    "palette_name": "MEPAG",
+    "hide_zeros": false
+}
