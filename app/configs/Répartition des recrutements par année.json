@@ -1,0 +1,27 @@
+{
+    "selected_columns": [
+        "M\u00e9tier",
+        "Ann\u00e9e",
+        "Total"
+    ],
+    "start_row": 0,
+    "end_row": 18,
+    "analysis_mode": "Comparaison multiple",
+    "graph_type": "Graphe de synth\u00e8se crois\u00e9e",
+    "agg_func": "Somme",
+    "display_as_percent": false,
+    "graph_title": "R\u00e9partition des recrutements par ann\u00e9e",
+    "value_cols_multiple": [],
+    "value_cols_stack": [],
+    "group_col_stack": null,
+    "col_x": null,
+    "col_y": null,
+    "x_axis_label": "Ann\u00e9e",
+    "y_axis_label": "Nombre de recrutements",
+    "invert_axes": false,
+    "palette_name": "MEPAG",
+    "hide_zeros": false,
+    "pivot_field_regroupement": "Ann\u00e9e",
+    "pivot_field_empilement": "M\u00e9tier",
+    "pivot_field_valeur": "Total"
+}

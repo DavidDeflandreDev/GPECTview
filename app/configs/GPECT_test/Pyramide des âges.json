@@ -8,12 +8,11 @@
         "Plus de 60 ans"
     ],
     "start_row": 0,
-    "end_row": 12,
+    "end_row": 15,
     "analysis_mode": "Comparaison multiple",
     "graph_type": "Barres centre",
-    "agg_func": "Somme",
     "display_as_percent": false,
-    "graph_title": "Pyramide des \u00e2ges tous secteurs confondus",
+    "graph_title": "Pyramide ages",
     "value_cols_multiple": [
         "De 18 \u00e0 30 ans",
         "De 31 \u00e0 40 ans",
@@ -26,9 +25,12 @@
     "group_col_stack": null,
     "col_x": null,
     "col_y": null,
-    "x_axis_label": "\u00c2ges",
-    "y_axis_label": "R\u00e9partition en %",
+    "x_axis_label": "Label",
+    "y_axis_label": "Valeur",
     "invert_axes": true,
     "palette_name": "MEPAG",
-    "hide_zeros": false
+    "hide_zeros": false,
+    "pivot_field_regroupement": null,
+    "pivot_field_empilement": null,
+    "pivot_field_valeur": null
 }

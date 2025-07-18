@@ -1,24 +1,23 @@
 {
     "selected_columns": [
-        "Recrutement 2026",
-        "Recrutement 2027",
-        "Recrutement 2028",
-        "Recrutement 2029",
-        "Recrutement 2030"
+        "D\u00e9parts 2026",
+        "D\u00e9parts 2027",
+        "D\u00e9parts 2028",
+        "D\u00e9parts 2029",
+        "D\u00e9parts 2030"
     ],
     "start_row": 0,
-    "end_row": 12,
+    "end_row": 15,
     "analysis_mode": "Comparaison multiple",
     "graph_type": "Barres",
-    "agg_func": "Somme",
     "display_as_percent": false,
     "graph_title": "Pr\u00e9visions des d\u00e9parts \u00e0 la retraite sur les 5 prochaines ann\u00e9es",
     "value_cols_multiple": [
-        "Recrutement 2026",
-        "Recrutement 2027",
-        "Recrutement 2028",
-        "Recrutement 2029",
-        "Recrutement 2030"
+        "D\u00e9parts 2026",
+        "D\u00e9parts 2027",
+        "D\u00e9parts 2028",
+        "D\u00e9parts 2029",
+        "D\u00e9parts 2030"
     ],
     "value_cols_stack": [],
     "group_col_stack": null,
@@ -28,5 +27,8 @@
     "y_axis_label": "Nombre de d\u00e9parts",
     "invert_axes": false,
     "palette_name": "Viridis",
-    "hide_zeros": false
+    "hide_zeros": false,
+    "pivot_field_regroupement": null,
+    "pivot_field_empilement": null,
+    "pivot_field_valeur": null
 }

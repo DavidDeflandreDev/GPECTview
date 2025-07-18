@@ -9,10 +9,9 @@
         "Plus de 60 ans"
     ],
     "start_row": 0,
-    "end_row": 12,
+    "end_row": 15,
     "analysis_mode": "Comparaison multiple",
     "graph_type": "Barres empil\u00e9es",
-    "agg_func": "Somme",
     "display_as_percent": true,
     "graph_title": "R\u00e9partition des \u00e2ges dans les entreprises par secteur d'activit\u00e9",
     "value_cols_multiple": [],
@@ -31,5 +30,8 @@
     "y_axis_label": "R\u00e9partition en %",
     "invert_axes": true,
     "palette_name": "MEPAG",
-    "hide_zeros": false
+    "hide_zeros": false,
+    "pivot_field_regroupement": null,
+    "pivot_field_empilement": null,
+    "pivot_field_valeur": null
 }

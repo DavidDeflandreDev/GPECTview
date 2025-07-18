@@ -10,6 +10,7 @@ import io
 import json
 from visualization import export_chart_as_image, create_bar_chart, create_stacked_bar_chart, create_centered_bar_chart, create_pie_chart
 from config import validate_config
+from utils import format_number
 
 def display_file_uploader():
     # ... copier la fonction depuis app.py ...
@@ -216,6 +217,11 @@ def display_column_selection(df):
         st.markdown("---", unsafe_allow_html=True)
         st.subheader("📄 Sélection des lignes")
         max_row_index = len(df) - 1
+        # Correction automatique si la config charge une valeur hors bornes
+        if st.session_state.get("start_row", 0) > max_row_index:
+            st.session_state["start_row"] = 0
+        if st.session_state.get("end_row", max_row_index) > max_row_index:
+            st.session_state["end_row"] = max_row_index
         start_row = st.number_input("Ligne début", 0, max_row_index, value=st.session_state.get("start_row", 0))
         end_row = st.number_input("Ligne fin", start_row, max_row_index, value=st.session_state.get("end_row", max_row_index))
         if st.button("❌ Effacer la sélection", key="effacer_colonnes"):
@@ -228,7 +234,10 @@ def display_column_selection(df):
 def display_visualization_settings():
     # ... copier la fonction depuis app.py ...
     with st.expander("🔧 Options"):
-        graph_type_options = ["Barres", "Barres centre", "Camembert", "Barres empilées"]
+        graph_type_options = [
+            "Barres", "Barres centre", "Camembert", "Barres empilées",
+            "Graphe de synthèse croisée"
+        ]
         default_graph_type = st.session_state.get("graph_type", "Barres")
         default_graph_index = graph_type_options.index(default_graph_type) if default_graph_type in graph_type_options else 0
         graph_type = st.selectbox(
@@ -238,9 +247,21 @@ def display_visualization_settings():
             key="graph_type",
             help="Choisissez le type de graphique à afficher."
         )
+        # On ne gère plus la sélection des colonnes ici pour ce graphe
+        # Options spécifiques pour le nouveau graphe
+        col_métier = col_date = col_nombre = None
+        if graph_type == "Recrutements par métier et par année (barres empilées)":
+            st.markdown("**Sélectionnez les colonnes pour le graphe de recrutements par métier et par année :**")
+            all_cols = st.session_state.selected_columns if "selected_columns" in st.session_state else []
+            col_métier = st.selectbox("Colonne métier (string)", all_cols, key="col_metier")
+            col_date = st.selectbox("Colonne date de recrutement", all_cols, key="col_date_recrutement")
+            col_nombre = st.selectbox("Colonne nombre de recrutements (numérique)", all_cols, key="col_nombre_recrutement")
         if graph_type == "Barres empilées":
             analysis_mode = "Empilement"
             st.markdown("**Mode d'analyse :** Empilement (fixé pour ce type de graphique)")
+        elif graph_type == "Camembert":
+            analysis_mode = "Comparaison multiple"
+            st.markdown("**Mode d'analyse :** Comparaison multiple (fixé pour ce type de graphique)")
         else:
             analysis_mode_options = ["Comparaison multiple", "Analyse croisée"]
             default_analysis_mode = st.session_state.get("analysis_mode", "Comparaison multiple")
@@ -252,16 +273,17 @@ def display_visualization_settings():
                 key="analysis_mode",
                 help="Comparaison de plusieurs colonnes ou analyse croisée entre deux variables."
             )
-        agg_func_options = ["Somme", "Moyenne", "Médiane"]
-        default_agg_func = st.session_state.get("agg_func", "Somme")
-        default_agg_index = agg_func_options.index(default_agg_func) if default_agg_func in agg_func_options else 0
-        agg_func = st.selectbox(
-            "Type de calcul",
-            options=agg_func_options,
-            index=default_agg_index,
-            key="agg_func",
-            help="Fonction d'agrégation pour les colonnes numériques."
-        )
+        # --- SUPPRESSION : Type de calcul (méthode d'agrégation) ---
+        # agg_func_options = ["Somme", "Moyenne", "Médiane"]
+        # default_agg_func = st.session_state.get("agg_func", "Somme")
+        # default_agg_index = agg_func_options.index(default_agg_func) if default_agg_func in agg_func_options else 0
+        # agg_func = st.selectbox(
+        #     "Type de calcul",
+        #     options=agg_func_options,
+        #     index=default_agg_index,
+        #     key="agg_func",
+        #     help="Fonction d'agrégation pour les colonnes numériques."
+        # )
         display_as_percent = st.checkbox(
             "Afficher en pourcentage",
             value=st.session_state.get("display_as_percent", False),
@@ -300,11 +322,45 @@ def display_visualization_settings():
             key="hide_zeros",
             help="Si coché, les valeurs à zéro ne seront pas affichées dans le graphique."
         )
+        # Paramètres spécifiques pour le Graphe de synthèse croisée
+        col_regroupement = col_empilement = col_valeur = None
+        if graph_type == "Graphe de synthèse croisée":
+            all_cols = st.session_state.get("selected_columns", [])
+            pivot_regroupement = st.session_state.get("pivot_field_regroupement") or st.session_state.get("pivot_col_regroupement")
+            pivot_empilement = st.session_state.get("pivot_field_empilement") or st.session_state.get("pivot_col_empilement")
+            pivot_valeur = st.session_state.get("pivot_field_valeur") or st.session_state.get("pivot_col_valeur")
+            temp_col_regroupement = st.selectbox(
+                "Colonne de regroupement (X/barres)", ["-- Sélectionner --"] + all_cols,
+                index=all_cols.index(pivot_regroupement) + 1 if pivot_regroupement in all_cols else 0,
+                key="pivot_temp_col_regroupement"
+            )
+            temp_col_empilement = st.selectbox(
+                "Colonne à empiler (catégorie/couleur)", ["-- Sélectionner --"] + all_cols,
+                index=all_cols.index(pivot_empilement) + 1 if pivot_empilement in all_cols else 0,
+                key="pivot_temp_col_empilement"
+            )
+            temp_col_valeur = st.selectbox(
+                "Colonne de valeur (somme)", ["-- Sélectionner --"] + all_cols,
+                index=all_cols.index(pivot_valeur) + 1 if pivot_valeur in all_cols else 0,
+                key="pivot_temp_col_valeur"
+            )
+            if st.button("Valider la sélection des colonnes du pivot"):
+                if temp_col_regroupement != "-- Sélectionner --" and temp_col_empilement != "-- Sélectionner --" and temp_col_valeur != "-- Sélectionner --":
+                    st.session_state["pivot_col_regroupement"] = temp_col_regroupement
+                    st.session_state["pivot_col_empilement"] = temp_col_empilement
+                    st.session_state["pivot_col_valeur"] = temp_col_valeur
+                    st.session_state["pivot_field_regroupement"] = temp_col_regroupement
+                    st.session_state["pivot_field_empilement"] = temp_col_empilement
+                    st.session_state["pivot_field_valeur"] = temp_col_valeur
+                else:
+                    st.warning("Veuillez sélectionner les trois colonnes avant de valider.")
+            col_regroupement = st.session_state.get("pivot_field_regroupement") or st.session_state.get("pivot_col_regroupement")
+            col_empilement = st.session_state.get("pivot_field_empilement") or st.session_state.get("pivot_col_empilement")
+            col_valeur = st.session_state.get("pivot_field_valeur") or st.session_state.get("pivot_col_valeur")
     graph_title = st.text_input("Titre du graphe", value=st.session_state.get("graph_title", ""), key="graph_title", help="Titre affiché au-dessus du graphique.")
     return {
         "graph_type": graph_type,
-        "analysis_mode": analysis_mode,
-        "agg_func": agg_func,
+        "analysis_mode": analysis_mode if graph_type != "Barres empilées" else "Empilement",
         "display_as_percent": display_as_percent,
         "x_axis_label": x_axis_label,
         "y_axis_label": y_axis_label,
@@ -312,7 +368,13 @@ def display_visualization_settings():
         "graph_title": graph_title,
         "palette": palette,
         "palette_name": palette_name,
-        "hide_zeros": hide_zeros
+        "hide_zeros": hide_zeros,
+        "col_metier": col_métier,
+        "col_date_recrutement": col_date,
+        "col_nombre_recrutement": col_nombre,
+        "pivot_field_regroupement": col_regroupement,
+        "pivot_field_empilement": col_empilement,
+        "pivot_field_valeur": col_valeur
     }
 
 def display_save_configuration():
@@ -345,7 +407,6 @@ def display_save_configuration():
                         "end_row": st.session_state.get("end_row", 9),
                         "analysis_mode": st.session_state.get("analysis_mode", "Comparaison multiple"),
                         "graph_type": st.session_state.get("graph_type", "Barres"),
-                        "agg_func": st.session_state.get("agg_func", "Somme"),
                         "display_as_percent": st.session_state.get("display_as_percent", False),
                         "graph_title": st.session_state.get("graph_title", ""),
                         "value_cols_multiple": st.session_state.get("value_cols_multiple", []),
@@ -357,7 +418,10 @@ def display_save_configuration():
                         "y_axis_label": st.session_state.get("y_axis_label", "Valeur"),
                         "invert_axes": st.session_state.get("invert_axes", False),
                         "palette_name": st.session_state.get("palette_name", "Plotly"),
-                        "hide_zeros": st.session_state.get("hide_zeros", False)
+                        "hide_zeros": st.session_state.get("hide_zeros", False),
+                        "pivot_field_regroupement": st.session_state.get("pivot_field_regroupement"),
+                        "pivot_field_empilement": st.session_state.get("pivot_field_empilement"),
+                        "pivot_field_valeur": st.session_state.get("pivot_field_valeur")
                     }
                     dossier_path = os.path.join(CONFIG_DIR, dossier_select)
                     if not os.path.exists(dossier_path):
@@ -381,7 +445,6 @@ def display_save_configuration():
                         "end_row": st.session_state.get("end_row", 9),
                         "analysis_mode": st.session_state.get("analysis_mode", "Comparaison multiple"),
                         "graph_type": st.session_state.get("graph_type", "Barres"),
-                        "agg_func": st.session_state.get("agg_func", "Somme"),
                         "display_as_percent": st.session_state.get("display_as_percent", False),
                         "graph_title": st.session_state.get("graph_title", ""),
                         "value_cols_multiple": st.session_state.get("value_cols_multiple", []),
@@ -393,7 +456,10 @@ def display_save_configuration():
                         "y_axis_label": st.session_state.get("y_axis_label", "Valeur"),
                         "invert_axes": st.session_state.get("invert_axes", False),
                         "palette_name": st.session_state.get("palette_name", "Plotly"),
-                        "hide_zeros": st.session_state.get("hide_zeros", False)
+                        "hide_zeros": st.session_state.get("hide_zeros", False),
+                        "pivot_field_regroupement": st.session_state.get("pivot_field_regroupement"),
+                        "pivot_field_empilement": st.session_state.get("pivot_field_empilement"),
+                        "pivot_field_valeur": st.session_state.get("pivot_field_valeur")
                     }
                     selected_file = st.session_state.selected_config_file
                     if os.sep in selected_file:
@@ -416,31 +482,14 @@ def display_save_configuration():
         # (plus d'expander, plus de bouton de téléchargement zip, plus d'appels backend)
 
 def display_multi_response_processing(selected_df):
-    # Détection des colonnes à réponses multiples (texte) et numériques
+    # Le traitement se fait désormais en fond, sans affichage ni interaction utilisateur
     text_cols = [col for col in selected_df.columns if selected_df[col].dropna().astype(str).str.contains(",").any()]
     num_cols = [col for col in selected_df.columns if pd.api.types.is_numeric_dtype(selected_df[col])]
-
     if not text_cols or not num_cols:
-        st.info("Il faut au moins une colonne à réponses multiples (texte) et une colonne numérique pour ce traitement.")
         return None
-
-    st.subheader("🧪 Traitement des réponses multiples (catégorie + valeurs numériques)")
-    col_categorie = st.selectbox(
-        "Colonne de catégorie à exploser (ex: secteur d'activité)",
-        options=text_cols,
-        key="multi_categorie"
-    )
-    cols_numeriques = st.multiselect(
-        "Colonnes numériques à sommer (ex: Nombre de CDI, Nombre de CDD)",
-        options=num_cols,
-        default=num_cols,
-        key="multi_numeriques"
-    )
-
-    if not col_categorie or not cols_numeriques:
-        return None
-
-    # Explosion de la colonne catégorie avec répartition équitable
+    # On prend la première colonne texte et toutes les colonnes numériques par défaut
+    col_categorie = text_cols[0]
+    cols_numeriques = num_cols
     exploded = selected_df[[col_categorie] + cols_numeriques].dropna(subset=[col_categorie])
     exploded[col_categorie] = exploded[col_categorie].astype(str)
     exploded["modalites"] = exploded[col_categorie].str.split(",")
@@ -451,8 +500,6 @@ def display_multi_response_processing(selected_df):
     exploded["modalites"] = exploded["modalites"].str.strip()
     AUTRE_VALUES = ["autre", "autres", "pas dans la liste..."]
     exploded = exploded[~exploded["modalites"].str.lower().isin(AUTRE_VALUES)]
-
-    # Agrégation par modalité et colonne numérique
     melted = exploded.melt(id_vars=["modalites"], value_vars=cols_numeriques, var_name="Type", value_name="Valeur")
     melted = melted.dropna(subset=["Valeur"])
     melted["Valeur"] = pd.to_numeric(melted["Valeur"], errors="coerce")
@@ -472,6 +519,4 @@ def display_multi_response_processing(selected_df):
                 label_df["Valeur"] = 100 * label_df["Valeur"] / total
             else:
                 label_df["Valeur"] = 0
-    st.markdown("✅ Agrégation effectuée. Prêt pour un graphique à barres empilées ou autre.")
-    st.write(label_df)  # Pour debug, voir le DataFrame généré
     return label_df 

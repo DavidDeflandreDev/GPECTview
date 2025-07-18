@@ -33,20 +33,22 @@ def process_comparison_mode(selected_df, settings):
         options,
         default=value_cols_multiple
     )
-    if st.button("Valider la sélection des colonnes"):
+    if st.button("Valider la sélection des colonnes", key="valider_colonnes_comparaison"):
         st.session_state.value_cols_multiple = temp_value
     value_cols_multiple = st.session_state.get("value_cols_multiple", [])
     if not value_cols_multiple:
         return None
     if len(value_cols_multiple) == 1:
         return process_single_column(selected_df, value_cols_multiple[0], settings["display_as_percent"])
-    return process_multiple_columns(selected_df, value_cols_multiple, settings["agg_func"], settings["display_as_percent"])
+    return process_multiple_columns(selected_df, value_cols_multiple, settings["display_as_percent"])
 
 def process_single_column(df, col_name, display_as_percent):
     df = filter_autre_values(df)  # AJOUT FILTRAGE
     col_series = df[col_name].dropna().astype(str).str.strip()
+    col_series = col_series[col_series != ""]  # Filtrer les vides
     if col_series.str.contains(",").any():
         col_series = col_series.str.split(",").explode().str.strip()
+        col_series = col_series[col_series != ""]  # Filtrer les vides après explosion
     vc = col_series.value_counts().reset_index()
     vc.columns = ["Label", "Valeur"]
     if display_as_percent:
@@ -56,61 +58,71 @@ def process_single_column(df, col_name, display_as_percent):
     vc["Couleur"] = PALETTE[:len(vc)]
     return vc
 
-def process_multiple_columns(df, columns, agg_func, display_as_percent):
-    df = filter_autre_values(df)  # AJOUT FILTRAGE
-    agg_map = {
-        "Somme": lambda x: x.sum(),
-        "Moyenne": lambda x: x.mean(),
-        "Médiane": lambda x: x.median(),
-    }
-    func = agg_map.get(agg_func, lambda x: x.sum())
-    vals = []
-    labels = []
-    couleurs = []
+def process_multiple_columns(df, columns, display_as_percent):
+    import streamlit as st
+    from itertools import cycle
+    df = filter_autre_values(df)
+    label_df_list = []
     for i, col in enumerate(columns):
+        if col not in df.columns:
+            st.warning(f"Colonne '{col}' absente du DataFrame, ignorée.")
+            continue
+        couleur = PALETTE[i % len(PALETTE)]
         if pd.api.types.is_numeric_dtype(df[col]):
             numeric_series = pd.to_numeric(df[col], errors='coerce')
-            if isinstance(numeric_series, pd.Series):
-                numeric_series = numeric_series.fillna(0)
-            else:
-                numeric_series = pd.Series([numeric_series]).fillna(0)
-            val = func(numeric_series)
-            vals.append(val)
-            labels.append(col)
-            couleurs.append(PALETTE[i % len(PALETTE)])
-        else:
-            vals.append(None)
-            labels.append(col)
-            couleurs.append(PALETTE[i % len(PALETTE)])
-    total_val = sum(v for v in vals if v is not None)
-    label_df_list = []
-    for i, val in enumerate(vals):
-        col = labels[i]
-        couleur = couleurs[i]
-        if val is not None:
-            v = val
-            if display_as_percent and total_val:
-                v = val / total_val * 100
-            label_df_list.append({"Label": col, "Valeur": v, "Couleur": couleur})
+            if not isinstance(numeric_series, pd.Series):
+                numeric_series = pd.Series([numeric_series])
+            numeric_series = numeric_series.fillna(0)
+            if numeric_series.empty:
+                st.warning(f"Colonne numérique '{col}' vide, ignorée.")
+                continue
+            val = numeric_series.sum()  # Toujours la somme
+            label = col
+            if display_as_percent:
+                total = numeric_series.sum()
+                val = (val / total * 100) if total else 0
+            label_df_list.append({"Label": label, "Valeur": val, "Couleur": couleur})
         else:
             col_series = df[col].dropna().astype(str).str.strip()
+            col_series = col_series[col_series != ""]  # Filtrer les vides
+            if col_series.empty:
+                st.warning(f"Colonne texte '{col}' vide, ignorée.")
+                continue
             if col_series.str.contains(",").any():
                 col_series = col_series.str.split(",").explode().str.strip()
+                col_series = col_series[col_series != ""]  # Filtrer les vides après explosion
             vc = col_series.value_counts().reset_index()
             vc.columns = ["Label", "Valeur"]
             if display_as_percent:
                 total = vc["Valeur"].sum()
                 if total:
                     vc["Valeur"] = vc["Valeur"] / total * 100
-            vc["Couleur"] = [couleur] * len(vc)
-            label_df_list.append(vc)
+            # Contrôle explicite sur la palette
+            n_modalites = len(vc)
+            if n_modalites > len(PALETTE):
+                st.error(f"Erreur : pas assez de couleurs dans la palette ({len(PALETTE)}) pour toutes les valeurs à afficher ({n_modalites}). Veuillez choisir une palette plus grande ou réduire le nombre de modalités.")
+                continue
+            vc["Couleur"] = [PALETTE[j % len(PALETTE)] for j in range(n_modalites)]
+            if not vc.empty:
+                label_df_list.append(vc)
     df_parts = []
     for item in label_df_list:
         if isinstance(item, dict):
             df_parts.append(pd.DataFrame([item]))
-        else:
+        elif isinstance(item, pd.DataFrame) and not item.empty:
             df_parts.append(item)
-    return pd.concat(df_parts, ignore_index=True) if df_parts else None
+    if not df_parts:
+        st.error("Aucune donnée exploitable pour la comparaison multiple (toutes les colonnes sont vides ou invalides).")
+        return None
+    try:
+        result = pd.concat(df_parts, ignore_index=True)
+        if result.empty:
+            st.error("Le DataFrame final de comparaison multiple est vide.")
+            return None
+        return result
+    except Exception as e:
+        st.error(f"Erreur lors de la concaténation des résultats : {e}")
+        return None
 
 def process_stacked_mode(selected_df, settings):
     selected_df = filter_autre_values(selected_df)  # AJOUT FILTRAGE
@@ -132,7 +144,7 @@ def process_stacked_mode(selected_df, settings):
         num_options, 
         default=value_cols_stack
     )
-    if st.button("Valider la sélection des colonnes à empiler"):
+    if st.button("Valider la sélection des colonnes à empiler", key="valider_colonnes_empilement"):
         st.session_state.value_cols_stack = temp_value_stack
     value_cols_stack = st.session_state.get("value_cols_stack", [])
     if not col_group_stack or not value_cols_stack:
@@ -149,18 +161,16 @@ def process_stacked_mode(selected_df, settings):
 
     # Agrégation par regroupement + type
     df_melt = df_melt.groupby([col_group_stack, "Type"], as_index=False)["Valeur"].sum()
-
-    if settings["display_as_percent"]:
-        df_melt = df_melt.groupby(col_group_stack).apply(
-            lambda grp: grp.assign(Valeur=grp["Valeur"] / grp["Valeur"].sum() * 100)
-        ).reset_index(drop=True)
-    label_df = df_melt.rename(columns={col_group_stack: "Label"})
-    label_df["Couleur"] = pd.Series(PALETTE).sample(n=len(label_df), replace=True).values
+    df_melt = df_melt.rename(columns={col_group_stack: "Label"})
+    # Normalisation à 100% si affichage en pourcentage
+    if settings.get("display_as_percent", False):
+        df_melt["Valeur"] = df_melt.groupby("Label")["Valeur"].transform(lambda x: 100 * x / x.sum() if x.sum() else 0)
+    df_melt["Couleur"] = pd.Series(PALETTE).sample(n=len(df_melt), replace=True).values
     unique_vals = selected_df[col_group_stack].dropna().unique()
     if len(unique_vals) == 1:
         st.error("Le graphique ne peut pas être généré car la colonne de regroupement ne contient qu'une seule valeur unique.")
         return None
-    return label_df
+    return df_melt
 
 def process_cross_analysis(selected_df, settings):
     selected_df = filter_autre_values(selected_df)  # AJOUT FILTRAGE
@@ -198,15 +208,16 @@ def process_cross_analysis(selected_df, settings):
         if total:
             grouped[col_y] = grouped[col_y] / total * 100
     grouped.columns = ["Label", "Valeur"]
+    # Suppression du filtrage des barres à 0 : on affiche toutes les catégories
     return grouped 
 
-def process_comparison_mode_backend(selected_df, value_cols_multiple, agg_func, display_as_percent):
+def process_comparison_mode_backend(selected_df, value_cols_multiple, display_as_percent):
     selected_df = filter_autre_values(selected_df)
     if not value_cols_multiple:
         return None
     if len(value_cols_multiple) == 1:
         return process_single_column(selected_df, value_cols_multiple[0], display_as_percent)
-    return process_multiple_columns(selected_df, value_cols_multiple, agg_func, display_as_percent)
+    return process_multiple_columns(selected_df, value_cols_multiple, display_as_percent)
 
 def process_stacked_mode_backend(selected_df, group_col_stack, value_cols_stack, display_as_percent):
     selected_df = filter_autre_values(selected_df)

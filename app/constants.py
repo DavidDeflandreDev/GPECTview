@@ -29,4 +29,16 @@ def get_mepag_palette(n):
     palette = []
     for fam, count in zip(familles, counts):
         palette += fam[:count] if count <= len(fam) else fam + fam[:count-len(fam)]
-    return palette[:n] 
+    return palette[:n]
+
+def get_palette(palette, n, palette_name=None):
+    """
+    Retourne une liste de n couleurs à partir d'une palette de base.
+    - Pour MEPAG, utilise get_mepag_palette.
+    - Pour les autres, cycle la palette si besoin.
+    """
+    if palette_name == "MEPAG" or palette is None:
+        return get_mepag_palette(n)
+    else:
+        from itertools import cycle
+        return [c for _, c in zip(range(n), cycle(palette))] 

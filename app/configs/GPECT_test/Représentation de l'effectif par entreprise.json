@@ -7,11 +7,10 @@
         "Nombre d'apprentissage ou alternance"
     ],
     "start_row": 0,
-    "end_row": 12,
+    "end_row": 15,
     "analysis_mode": "Comparaison multiple",
     "graph_type": "Barres empil\u00e9es",
-    "agg_func": "Somme",
-    "display_as_percent": true,
+    "display_as_percent": false,
     "graph_title": "Repr\u00e9sentation de l'effectif par entreprise",
     "value_cols_multiple": [
         "Nombre de CDI",
@@ -32,5 +31,8 @@
     "y_axis_label": "Entreprises",
     "invert_axes": true,
     "palette_name": "MEPAG",
-    "hide_zeros": false
+    "hide_zeros": false,
+    "pivot_field_regroupement": null,
+    "pivot_field_empilement": null,
+    "pivot_field_valeur": null
 }

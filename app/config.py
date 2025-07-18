@@ -14,6 +14,8 @@ def validate_config(config, df):
         return False
     start_row = config.get("start_row", 0)
     end_row = config.get("end_row", 9)
+    if end_row >= len(df):
+        end_row = len(df) - 1
     if not (0 <= start_row < len(df)) or not (0 <= end_row < len(df)) or start_row > end_row:
         return False
     return True
