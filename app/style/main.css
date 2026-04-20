@@ -1,0 +1,294 @@
+/* main.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+/* Global Typography */
+html,
+body,
+[class*="css"] {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Le header doit avoir une hauteur réelle pour que le bouton natif d'ouverture du sidebar soit visible.
+   On le rend transparent et non-bloquant via pointer-events. */
+header[data-testid="stHeader"] {
+    position: fixed !important;
+    top: 20px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    background-color: transparent !important;
+    pointer-events: none;
+    z-index: 999;
+    overflow: visible !important;
+}
+
+/* Les boutons dans le header restent cliquables (bouton d'ouverture sidebar) */
+header[data-testid="stHeader"] button {
+    pointer-events: auto !important;
+}
+
+.block-container {
+    padding-top: 4rem !important;
+}
+
+/* Cacher le toolbar Streamlit (Deploy, Menu) */
+.stApp .stDeployButton,
+.stApp #MainMenu {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+footer {
+    display: none !important;
+}
+
+/* Pousser le contenu de la sidebar vers le bas pour que le bouton de fermeture soit visible */
+section[data-testid="stSidebar"]>div:first-child {
+    padding-top: 2rem !important;
+}
+
+/* Bouton de fermeture de la sidebar - On s'assure qu'il est bien stylisé et visible */
+section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
+    margin-top: 0.5rem !important;
+    color: var(--text-color) !important;
+    background-color: var(--surface-color) !important;
+    border: 1px solid var(--secondary-color) !important;
+    border-radius: 8px !important;
+}
+
+button[data-testid="stSidebarCollapseButton"]:hover {
+    background-color: var(--secondary-hover) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.stApp,
+.stApp p:not([data-testid="stNotification"] p):not([data-testid="stToast"] p):not(.custom-alert p),
+.stApp span:not([data-baseweb="tag"] span):not([data-testid="stNotification"] span):not([data-testid="stToast"] span):not(.custom-alert span),
+.stApp label:not([data-testid="stNotification"] label),
+.stApp div:not([data-baseweb="tag"] div):not([data-testid="stNotification"] div):not([data-testid="stToast"] div):not(.custom-alert div),
+.stApp small {
+    color: var(--text-color) !important;
+}
+
+.stApp {
+    background-color: var(--bg-color) !important;
+}
+
+
+/* Sidebar Styling */
+[data-testid="stSidebar"] {
+    background-color: var(--surface-color) !important;
+    border-right: 1px solid var(--secondary-color) !important;
+    box-shadow: 2px 0 15px var(--shadow-color) !important;
+}
+
+/* Titles and Headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.stMarkdown h1,
+.stMarkdown h2,
+.stMarkdown h3 {
+    color: var(--text-color) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px;
+}
+
+.stMarkdown h1 {
+    text-align: center;
+    color: var(--primary-color) !important;
+    margin-bottom: 30px;
+}
+
+/* Links and interactables */
+a,
+a:hover {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+/* Expander / Card container */
+.streamlit-expanderHeader {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color) !important;
+    background-color: var(--surface-color) !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.streamlit-expanderHeader:hover {
+    background-color: var(--secondary-hover) !important;
+}
+
+
+div[data-testid="stExpander"] {
+    border: 1px solid var(--secondary-color) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px var(--shadow-color) !important;
+    background-color: var(--surface-color) !important;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+
+/* --- POPOVER STYLING --- */
+div[data-testid="stPopoverBody"],
+div[data-testid="stPopoverBody"]>div,
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Force transparency and theme colors on all nested containers */
+div[data-testid="stPopoverBody"] [data-testid="stMarkdownContainer"],
+div[data-testid="stPopoverBody"] [data-testid="stVerticalBlock"] {
+    background-color: transparent !important;
+}
+
+/* Theme all text types within popover while excluding alerts/tags */
+div[data-testid="stPopoverBody"] p:not([data-testid="stNotification"] p):not([data-testid="stToast"] p):not(.custom-alert p),
+div[data-testid="stPopoverBody"] span:not([data-baseweb="tag"] span):not([data-testid="stNotification"] span):not([data-testid="stToast"] span):not(.custom-alert span),
+div[data-testid="stPopoverBody"] label:not([data-testid="stNotification"] label),
+div[data-testid="stPopoverBody"] small:not([data-testid="stNotification"] small),
+div[data-testid="stPopoverBody"] div:not([data-baseweb="tag"] div):not([data-testid="stNotification"] div):not([data-testid="stToast"] div):not(.custom-alert div) {
+    color: var(--text-color) !important;
+}
+
+/* Specific styling for file uploader instructions and muted text */
+div[data-testid="stPopoverBody"] [data-testid="stFileUploadDropzoneInstructions"] span,
+div[data-testid="stPopoverBody"] small {
+    color: var(--text-muted) !important;
+}
+
+div[data-testid="stPopoverBody"] {
+    border: 1px solid var(--secondary-color) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px var(--shadow-color) !important;
+    padding: 15px !important;
+}
+
+/* Styling the popover trigger button (Primary style) */
+button[data-testid="stPopoverButton"] {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+    border: 1px solid var(--primary-hover) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 10px var(--shadow-color) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+button[data-testid="stPopoverButton"]:hover {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--secondary-color) !important;
+    transform: translateY(-2px);
+}
+
+/* Ensure text inside popover button is readable */
+button[data-testid="stPopoverButton"] [data-testid="stMarkdownContainer"] p {
+    color: var(--primary-text-color) !important;
+    margin: 0 !important;
+}
+
+div[data-testid="stVerticalBlock"] {
+    gap: 0.3rem !important;
+}
+
+div[data-testid="stPopoverBody"] [data-testid="stMarkdownContainer"] p {
+    color: var(--text-color) !important;
+}
+
+/* --- FILE UPLOADER STYLING --- */
+[data-testid="stFileUploader"] {
+    background-color: var(--bg-color) !important;
+    border: 2px dashed var(--secondary-hover) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-bottom: 25px;
+    box-shadow: inset 0 2px 4px var(--shadow-color) !important;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--primary-color) !important;
+    background-color: var(--surface-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color) !important;
+}
+
+[data-testid="stFileUploaderDropzone"] {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Base text and instructions */
+[data-testid="stFileUploadDropzoneInstructions"],
+[data-testid="stFileUploadDropzoneInstructions"] span {
+    color: var(--text-color) !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+}
+
+/* Smaller instructions text */
+[data-testid="stFileUploadDropzoneInstructions"] small {
+    color: var(--text-muted) !important;
+    font-size: 0.85rem !important;
+}
+
+[data-testid="stFileUploader"] label {
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 12px !important;
+}
+
+/* "Browse files" button styling */
+[data-testid="stFileUploader"] button {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.2s ease !important;
+    padding: 0.6rem 1.2rem !important;
+}
+
+[data-testid="stFileUploader"] button:hover {
+    background-color: var(--primary-hover) !important;
+    transform: scale(1.02);
+}
+
+/* File name and status displays */
+[data-testid="stFileUploaderFileName"] {
+    color: var(--primary-color) !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stFileUploaderFileStatus"],
+[data-testid="stFileUploaderFileErrorMessage"] {
+    color: var(--text-color) !important;
+}
+
+/* Clear icon color */
+[data-testid="stFileUploaderDeleteBtn"] {
+    color: var(--secondary-color) !important;
+}
+
+section[data-testid="stFileUploaderDropzone"] {
+    background-color: transparent !important;
+}
+
+/* Close gaps in sidebar columns for trash icon */
+[data-testid="stSidebar"] [data-testid="column"] {
+    width: fit-content !important;
+    min-width: unset !important;
+}

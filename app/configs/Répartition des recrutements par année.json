@@ -7,8 +7,7 @@
     "start_row": 0,
     "end_row": 18,
     "analysis_mode": "Comparaison multiple",
-    "graph_type": "Graphe de synth\u00e8se crois\u00e9e",
-    "agg_func": "Somme",
+    "graph_type": "R\u00e9partition crois\u00e9e",
     "display_as_percent": false,
     "graph_title": "R\u00e9partition des recrutements par ann\u00e9e",
     "value_cols_multiple": [],
@@ -23,5 +22,8 @@
     "hide_zeros": false,
     "pivot_field_regroupement": "Ann\u00e9e",
     "pivot_field_empilement": "M\u00e9tier",
-    "pivot_field_valeur": "Total"
+    "pivot_field_valeur": "Total",
+    "rc_col_x": "Ann\u00e9e",
+    "rc_col_color": "M\u00e9tier",
+    "rc_col_value": "Total"
 }

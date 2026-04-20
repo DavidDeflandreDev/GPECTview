@@ -1,0 +1,49 @@
+/* buttons.css */
+
+/* General Button overrides */
+.stButton>button,
+button[data-testid*="stBaseButton"],
+.stDownloadButton>button {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent !important;
+}
+
+/* Secondary Button (Universal Selector) */
+button[data-testid*="stBaseButton-secondary"],
+button[data-testid*="secondary"] {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--secondary-color) !important;
+    box-shadow: 0 2px 4px var(--shadow-color) !important;
+}
+
+button[data-testid*="stBaseButton-secondary"]:hover,
+button[data-testid*="secondary"]:hover {
+    background-color: var(--secondary-hover) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow-color) !important;
+}
+
+/* Primary Button (Universal Selector) */
+button[data-testid*="stBaseButton-primary"],
+button[data-testid*="primary"] {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+    border: 1px solid var(--primary-hover) !important;
+    box-shadow: 0 4px 10px var(--shadow-color) !important;
+}
+
+button[data-testid*="stBaseButton-primary"]:hover,
+button[data-testid*="primary"]:hover {
+    background-color: var(--primary-hover) !important;
+    color: var(--primary-text-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--shadow-color) !important;
+    border-color: var(--secondary-color) !important;
+}

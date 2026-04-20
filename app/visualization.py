@@ -10,8 +10,34 @@ from constants import get_mepag_palette, get_palette
 import matplotlib.colors as mcolors
 from utils import format_number
 
+from themes import THEMES, DEFAULT_THEME
+
 # Palette dynamique à adapter selon l'organisation future
 PALETTE = px.colors.qualitative.Plotly
+
+def apply_plotly_theme(fig):
+    """Applique les couleurs du thème actuel à une figure Plotly."""
+    theme_name = st.session_state.get("app_theme", DEFAULT_THEME)
+    theme = THEMES.get(theme_name, THEMES.get(DEFAULT_THEME))
+    
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color=theme["--text-color"]),
+        title_font=dict(color=theme["--primary-color"]),
+        legend_font=dict(color=theme["--text-color"]),
+    )
+    fig.update_xaxes(
+        gridcolor=theme["--secondary-color"],
+        zerolinecolor=theme["--secondary-color"],
+        tickfont=dict(color=theme["--text-muted"])
+    )
+    fig.update_yaxes(
+        gridcolor=theme["--secondary-color"],
+        zerolinecolor=theme["--secondary-color"],
+        tickfont=dict(color=theme["--text-muted"])
+    )
+    return fig
 
 def create_centered_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, display_as_percent, invert_axes, palette, show_legend=True):
     palette_name = st.session_state.get("palette_name", None)
@@ -105,7 +131,7 @@ def create_centered_bar_chart(label_df, graph_title, x_axis_label, y_axis_label,
         title=graph_title,
         showlegend=show_legend
     )
-    return fig
+    return apply_plotly_theme(fig)
 
 def create_stacked_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, display_as_percent, invert_axes, palette):
     palette_name = st.session_state.get("palette_name", None)
@@ -151,7 +177,7 @@ def create_stacked_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, 
         insidetextanchor="middle"
     )
     # Suppression du forçage de la plage de l'axe (plus de range=[0, 100])
-    return fig
+    return apply_plotly_theme(fig)
 
 def create_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, display_as_percent, invert_axes, palette, show_legend=True):
     # Gestion d'erreur : DataFrame vide ou None
@@ -217,6 +243,7 @@ def create_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, display_
                 fig.update_traces(textposition='inside', texttemplate='%{text}%')
             else:
                 fig.update_traces(textposition='inside', texttemplate='%{text}')
+            return apply_plotly_theme(fig)
     else:
         # Cas réponses multiples : pas de légende
         n = len(label_df)
@@ -261,7 +288,7 @@ def create_bar_chart(label_df, graph_title, x_axis_label, y_axis_label, display_
             textposition='inside',
             insidetextanchor='middle'
         )
-        return fig
+        return apply_plotly_theme(fig)
 
 def create_pie_chart(label_df, graph_title, palette):
     palette_name = st.session_state.get("palette_name", None)
@@ -275,7 +302,7 @@ def create_pie_chart(label_df, graph_title, palette):
         color_discrete_sequence=couleurs,
         title=graph_title
     )
-    return fig
+    return apply_plotly_theme(fig)
 
 # --- FONCTION UTILE : détection couleur claire/foncée ---
 def is_light_color(hex_color):
@@ -288,7 +315,7 @@ def is_light_color(hex_color):
 def export_chart_as_image(label_df, graph_type, graph_title, x_axis_label, y_axis_label, display_as_percent, invert_axes, palette, palette_name=None):
     # ... (copier la fonction depuis app.py)
     try:
-        st.write("Début de la génération de l'image...")  # Debug log
+
         label_df = label_df.copy()
         # --- SUPPRESSION DU TRI : on conserve l'ordre d'origine ---
         # if graph_type != "Barres empilées" and graph_type != "Barres centre":
@@ -303,9 +330,17 @@ def export_chart_as_image(label_df, graph_type, graph_title, x_axis_label, y_axi
         ax.spines['bottom'].set_visible(False)
         ax.grid(False)
         ax.tick_params(axis='both', which='both', length=0)
-        # --- MODIF : fond sombre ---
-        ax.set_facecolor('#0E1117')
-        fig.patch.set_facecolor('#0E1117')
+        
+        # --- MODIF : fond dynamique selon le thème ---
+        theme_name = st.session_state.get("app_theme", DEFAULT_THEME)
+        theme = THEMES.get(theme_name, THEMES.get(DEFAULT_THEME))
+        bg_color = theme["--bg-color"]
+        text_color = theme["--text-color"]
+        primary_color = theme["--primary-color"]
+        secondary_color = theme["--secondary-color"]
+        
+        ax.set_facecolor(bg_color)
+        fig.patch.set_facecolor(bg_color)
         # --- FIN MODIF ---
         # Palette dynamique pour MEPAG (même logique que l'affichage)
         n = len(label_df["Type"].unique()) if graph_type == "Barres empilées" and "Type" in label_df else len(label_df)
@@ -456,14 +491,14 @@ def export_chart_as_image(label_df, graph_type, graph_title, x_axis_label, y_axi
                                 ax.text(bar.get_x() + bar.get_width()/2, bar.get_y() + val/2,
                                         txt,
                                         ha='center', va='center', fontsize=10, color=text_color)
-        # --- MODIF : titre en gras et texte blanc ---
-        ax.set_title(graph_title, pad=20, color='white', fontweight='bold')
-        ax.set_xlabel(x_axis_label, color='white')
-        ax.set_ylabel(y_axis_label, color='white')
+        # --- MODIF : titre et labels dynamiques ---
+        ax.set_title(graph_title, pad=20, color=primary_color, fontweight='bold')
+        ax.set_xlabel(x_axis_label, color=text_color)
+        ax.set_ylabel(y_axis_label, color=text_color)
         # --- FIN MODIF ---
         # Couleur des axes
-        ax.tick_params(axis='x', colors='white')
-        ax.tick_params(axis='y', colors='white')
+        ax.tick_params(axis='x', colors=text_color)
+        ax.tick_params(axis='y', colors=text_color)
         if display_as_percent and graph_type != "Camembert":
             if invert_axes:
                 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.1f}%'))
@@ -483,9 +518,9 @@ def export_chart_as_image(label_df, graph_type, graph_title, x_axis_label, y_axi
             # Réordonner les handles selon l'ordre des labels dans le DataFrame
             label_to_handle = dict(zip(labels, handles))
             ordered_handles = [label_to_handle[l] for l in legend_labels if l in label_to_handle]
-            legend = ax.legend(ordered_handles, legend_labels, bbox_to_anchor=(1.02, y_center), loc='center left', fontsize=8, facecolor='#0E1117', edgecolor='white', labelcolor='white')
+            legend = ax.legend(ordered_handles, legend_labels, bbox_to_anchor=(1.02, y_center), loc='center left', fontsize=8, facecolor=bg_color, edgecolor=secondary_color, labelcolor=text_color)
             for text in legend.get_texts():
-                text.set_color('white')
+                text.set_color(text_color)
         plt.tight_layout()
         buf = io.BytesIO()
         plt.savefig(buf, format='png', dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
@@ -493,7 +528,7 @@ def export_chart_as_image(label_df, graph_type, graph_title, x_axis_label, y_axi
         img_bytes = buf.getvalue()
         buf.close()
         plt.close()
-        st.write("Image générée avec succès!")
+
         return img_bytes
     except Exception as e:
         st.error(f"Erreur lors de la création du graphique : {str(e)}")

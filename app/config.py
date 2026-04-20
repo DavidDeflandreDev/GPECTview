@@ -12,10 +12,15 @@ def validate_config(config, df):
     selected_columns = config.get("selected_columns", [])
     if not all(col in df.columns for col in selected_columns):
         return False
-    start_row = config.get("start_row", 0)
-    end_row = config.get("end_row", 9)
+    
+    start_row = config.get("start_row")
+    if start_row is None: start_row = 0
+    end_row = config.get("end_row")
+    if end_row is None: end_row = len(df) - 1
+    
     if end_row >= len(df):
         end_row = len(df) - 1
+        
     if not (0 <= start_row < len(df)) or not (0 <= end_row < len(df)) or start_row > end_row:
         return False
     return True
@@ -37,7 +42,7 @@ def list_config_folders_and_files():
         rel_folder = os.path.relpath(root, CONFIG_DIR)
         if rel_folder == ".":
             rel_folder = "Sans dossier"
-        folder_dict[rel_folder] = [f for f in files if f.endswith(".json")]
+        folder_dict[rel_folder] = [f for f in files if f.endswith(".json") and f != "app_settings.json"]
     return folder_dict
 
 def list_all_folders(base_dir=CONFIG_DIR):

@@ -1,2 +1,50 @@
+# Environnements virtuels
 venv/
+env/
+.env/
+
+# Python / Cache
 __pycache__/
+**/*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.tox/
+.mypy_cache/
+
+# Logs
+*.log
+
+# Node.js et dépendances
+node_modules/
+.npm/
+package-lock.json
+
+# Builds et artefacts Stlite/Electron
+dist/
+build/
+lib/
+*-win32-*/
+*.exe
+*.zip
+*.msi
+
+# Données locales et Persistance (GPECTview)
+app/last_file.csv
+app/test.csv
+app/configs/app_settings.json
+app_settings.json
+
+# Streamlit
+.streamlit/
+
+# IDE et OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+.project
+.pydevproject
+.settings/

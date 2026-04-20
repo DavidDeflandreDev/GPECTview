@@ -1,0 +1,40 @@
+{
+  "name": "gpectview",
+  "version": "1.0.0",
+  "description": "Visualisation GPEC",
+  "author": "David Deflandre",
+  "main": "./build/electron/main.js",
+  "scripts": {
+    "dump": "dump-stlite-desktop-artifacts && python fix_tar.py",
+    "serve": "cross-env NODE_ENV=production electron .",
+    "dist": "electron-builder -w"
+  },
+  "devDependencies": {
+    "@stlite/desktop": "^0.99.1",
+    "cross-env": "^7.0.3",
+    "electron": "^29.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "stlite": {
+    "desktop": {
+      "entrypoint": "app/gpectview_app.py",
+      "dependencies": ["streamlit", "pandas", "numpy", "matplotlib", "plotly"],
+      "files": ["app/", "test.csv", "test_graphe_synthèse_croisée.csv"],
+      "idbfsMountpoints": ["/mnt"],
+      "appMenu": false
+    }
+  },
+  "build": {
+    "appId": "com.daviddeflandre.gpectview",
+    "productName": "GPECTview",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  }
+}

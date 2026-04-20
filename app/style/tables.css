@@ -1,0 +1,54 @@
+/* tables.css */
+
+/* Dataframes and Tables Wrappers */
+.stDataFrame,
+table.gpec-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-color) !important;
+    border: none;
+    margin-bottom: 1rem;
+}
+
+div[data-testid="stDataFrame"]>div {
+    background-color: var(--secondary-hover) !important;
+}
+
+/* Header Cells */
+table.stDataFrame th,
+table.gpec-table th,
+.stDataFrame th {
+    background-color: color-mix(in srgb, var(--secondary-color), transparent 50%) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--primary-color) !important;
+    text-align: left;
+}
+
+/* Data Cells */
+table.stDataFrame td,
+table.gpec-table td,
+.stDataFrame td {
+    padding: 10px 15px;
+    color: var(--text-color) !important;
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--secondary-color) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Row Hover Effect */
+table.stDataFrame tr:hover td,
+table.gpec-table tr:hover td,
+.stDataFrame tr:hover td {
+    background-color: var(--secondary-hover) !important;
+    color: var(--primary-text-color) !important;
+}
+
+/* Make sure text within tables isn't hidden */
+.stDataFrame [data-testid="stMarkdownContainer"] {
+    color: var(--text-color) !important;
+}

@@ -1,0 +1,44 @@
+/* inputs.css */
+
+/* General input wrappers */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input {
+    background-color: var(--surface-color) !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--secondary-color) !important;
+    color: var(--text-color) !important;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+/* Focus states */
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px var(--secondary-hover) !important;
+}
+
+/* Select boxes */
+div[data-baseweb="select"] > div {
+    background-color: var(--surface-color) !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--secondary-color) !important;
+    color: var(--text-color) !important;
+}
+
+div[data-baseweb="select"] > div:hover {
+    border-color: var(--primary-hover) !important;
+}
+
+/* Labels */
+.stTextInput label, .stSelectbox label, .stNumberInput label, .stRadio label, .stCheckbox label {
+    font-weight: 500 !important;
+    color: var(--text-muted) !important;
+    margin-bottom: 4px;
+}
+
+/* Checkboxes and Radios */
+.stCheckbox > label > div[data-testid="stMarkdownContainer"] > p,
+.stRadio > label > div[data-testid="stMarkdownContainer"] > p {
+    color: var(--text-color) !important;
+}

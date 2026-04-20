@@ -1,9 +1,40 @@
 import pandas as pd
 import streamlit as st
 from constants import PALETTE
-
-# --- AJOUT : fonction utilitaire pour filtrer les valeurs "autre", "autres", "pas dans la liste..." ---
 import numpy as np
+
+
+def process_3d_stacked(df, col_x, col_color, col_value, display_as_percent):
+    """
+    Analyse 3D pour barres empilées :
+    - col_x     : colonne de regroupement axe X (ex: Année, numérique ou texte)
+    - col_color : colonne de la dimension couleur/empilement (ex: Métier, catégoriel)
+    - col_value : colonne numérique dont on somme les valeurs
+    Retourne un DataFrame Label/Type/Valeur pour create_stacked_bar_chart.
+    """
+    df = filter_autre_values(df)
+    for col in [col_x, col_color, col_value]:
+        if col not in df.columns:
+            st.error(f"Colonne introuvable : '{col}'")
+            return None
+    if not pd.api.types.is_numeric_dtype(df[col_value]):
+        st.error(f"La colonne '{col_value}' doit être numérique.")
+        return None
+
+    work = df[[col_x, col_color, col_value]].copy()
+    work[col_value] = pd.to_numeric(work[col_value], errors="coerce").fillna(0)
+    work[col_x] = work[col_x].astype(str).str.strip()
+    work[col_color] = work[col_color].astype(str).str.strip()
+    work = work[(work[col_x] != "") & (work[col_color] != "")]
+
+    grouped = work.groupby([col_x, col_color])[col_value].sum().reset_index()
+    grouped.columns = ["Label", "Type", "Valeur"]
+
+    if display_as_percent:
+        totals = grouped.groupby("Label")["Valeur"].transform("sum")
+        grouped["Valeur"] = (grouped["Valeur"] / totals * 100).where(totals > 0, 0)
+
+    return grouped[["Label", "Type", "Valeur"]]
 
 def filter_autre_values(df):
     AUTRE_VALUES = ["autre", "autres", "pas dans la liste..."]
@@ -63,6 +94,8 @@ def process_multiple_columns(df, columns, display_as_percent):
     from itertools import cycle
     df = filter_autre_values(df)
     label_df_list = []
+    numeric_items = []  # On stocke les items numériques pour calculer le % global après
+
     for i, col in enumerate(columns):
         if col not in df.columns:
             st.warning(f"Colonne '{col}' absente du DataFrame, ignorée.")
@@ -76,28 +109,25 @@ def process_multiple_columns(df, columns, display_as_percent):
             if numeric_series.empty:
                 st.warning(f"Colonne numérique '{col}' vide, ignorée.")
                 continue
-            val = numeric_series.sum()  # Toujours la somme
-            label = col
-            if display_as_percent:
-                total = numeric_series.sum()
-                val = (val / total * 100) if total else 0
-            label_df_list.append({"Label": label, "Valeur": val, "Couleur": couleur})
+            val = numeric_series.sum()
+            # On stocke la valeur brute, le % sera calculé après avec le total global
+            numeric_items.append({"Label": col, "Valeur": val, "Couleur": couleur})
         else:
             col_series = df[col].dropna().astype(str).str.strip()
-            col_series = col_series[col_series != ""]  # Filtrer les vides
+            col_series = col_series[col_series != ""]
             if col_series.empty:
                 st.warning(f"Colonne texte '{col}' vide, ignorée.")
                 continue
             if col_series.str.contains(",").any():
                 col_series = col_series.str.split(",").explode().str.strip()
-                col_series = col_series[col_series != ""]  # Filtrer les vides après explosion
+                col_series = col_series[col_series != ""]
             vc = col_series.value_counts().reset_index()
             vc.columns = ["Label", "Valeur"]
             if display_as_percent:
+                # Pour les colonnes texte, le % est relatif aux occurrences de cette colonne
                 total = vc["Valeur"].sum()
                 if total:
                     vc["Valeur"] = vc["Valeur"] / total * 100
-            # Contrôle explicite sur la palette
             n_modalites = len(vc)
             if n_modalites > len(PALETTE):
                 st.error(f"Erreur : pas assez de couleurs dans la palette ({len(PALETTE)}) pour toutes les valeurs à afficher ({n_modalites}). Veuillez choisir une palette plus grande ou réduire le nombre de modalités.")
@@ -105,17 +135,20 @@ def process_multiple_columns(df, columns, display_as_percent):
             vc["Couleur"] = [PALETTE[j % len(PALETTE)] for j in range(n_modalites)]
             if not vc.empty:
                 label_df_list.append(vc)
-    df_parts = []
-    for item in label_df_list:
-        if isinstance(item, dict):
-            df_parts.append(pd.DataFrame([item]))
-        elif isinstance(item, pd.DataFrame) and not item.empty:
-            df_parts.append(item)
-    if not df_parts:
+
+    # Calcul du pourcentage pour les colonnes numériques (relatif au total global)
+    if numeric_items:
+        if display_as_percent:
+            grand_total = sum(item["Valeur"] for item in numeric_items)
+            for item in numeric_items:
+                item["Valeur"] = (item["Valeur"] / grand_total * 100) if grand_total else 0
+        label_df_list.extend([pd.DataFrame([item]) for item in numeric_items])
+
+    if not label_df_list:
         st.error("Aucune donnée exploitable pour la comparaison multiple (toutes les colonnes sont vides ou invalides).")
         return None
     try:
-        result = pd.concat(df_parts, ignore_index=True)
+        result = pd.concat(label_df_list, ignore_index=True)
         if result.empty:
             st.error("Le DataFrame final de comparaison multiple est vide.")
             return None

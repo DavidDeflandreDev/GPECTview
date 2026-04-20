@@ -5,11 +5,14 @@
     ],
     "start_row": 0,
     "end_row": 15,
-    "analysis_mode": "Analyse crois\u00e9e",
+    "analysis_mode": "Analyse crois\u00e9e simple",
     "graph_type": "Barres",
     "display_as_percent": false,
     "graph_title": "R\u00e9partition des contrats d'apprentissage ou alternance par secteur d'activit\u00e9",
-    "value_cols_multiple": [],
+    "value_cols_multiple": [
+        "Secteur d'activit\u00e9",
+        "Nombre d'apprentissage ou alternance"
+    ],
     "value_cols_stack": [
         "Nombre d'apprentissage ou alternance"
     ],
@@ -23,5 +26,8 @@
     "hide_zeros": false,
     "pivot_field_regroupement": null,
     "pivot_field_empilement": null,
-    "pivot_field_valeur": null
+    "pivot_field_valeur": null,
+    "rc_col_x": null,
+    "rc_col_color": null,
+    "rc_col_value": null
 }

@@ -12,7 +12,28 @@ PALETTES_DISPONIBLES = {
     "MEPAG": None
 }
 
-CONFIG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'configs'))
+import sys
+import shutil
+
+ORIGINAL_CONFIG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'configs'))
+
+if sys.platform == 'emscripten':
+    CONFIG_DIR = "/mnt/configs"
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    # Si le cache IndexedDB est vide (premier lancement), on y copie les modèles initiaux
+    if not os.listdir(CONFIG_DIR) and os.path.exists(ORIGINAL_CONFIG_DIR):
+        for item in os.listdir(ORIGINAL_CONFIG_DIR):
+            s = os.path.join(ORIGINAL_CONFIG_DIR, item)
+            d = os.path.join(CONFIG_DIR, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d, dirs_exist_ok=True)
+            else:
+                shutil.copy2(s, d)
+else:
+    CONFIG_DIR = ORIGINAL_CONFIG_DIR
+
+APP_SETTINGS_FILE = os.path.join(CONFIG_DIR, "app_settings.json")
+
 
 def get_mepag_palette(n):
     """Répartit n couleurs entre bleu, blanc, rouge, en commençant par les plus vives/foncées, puis vers le clair."""
